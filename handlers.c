@@ -99,6 +99,6 @@ void handle_NOOP(const char *args) {
   ftp_session_t *sess = session_get();
   (void)args;
   (void)sess;
-
-  // Placeholder
+  //Implementacion de Noop
+  safe_dprintf(sess->control_sock, MSG_200);
 }

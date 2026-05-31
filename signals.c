@@ -1,5 +1,5 @@
 // signal.c
-
+#include "logs.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,15 +18,17 @@ static void handle_sigint(int sig) {
 
 
   if (in_handler) {
-    fprintf(stderr, "SIGINT handler reentered!\n");
+    log_error("SIGINT handler reentered");
     return; // Avoid running handler twice concurrently
   }
   in_handler = 1;
 
   static int sigint_count = 0;
-  fprintf(stderr, "SIGINT handler called (count = %d) in PID %d\n", ++sigint_count, getpid());
+  log_info("SIGINT handler called (count=%d) PID=%d",
+         ++sigint_count,
+         getpid());
 
-  printf("[+] SIGINT received. Shutting down...\n");
+  log_info("SIGINT received. Shutting down...");
   fflush(stdout);
 
   // Close listening socket
@@ -62,7 +64,8 @@ static void handle_sigterm(int sig) {
   }
   in_handler = 1;
 
-  fprintf(stderr, "[+] SIGTERM received. Shutting down (PID %d)...\n", getpid());
+ log_info("SIGTERM received. Shutting down PID=%d",
+         getpid());
 
   // Close listening socket if open
   if (server_socket >= 0) {
@@ -76,7 +79,8 @@ static void handle_sigterm(int sig) {
 void setup_signals(void) {
   struct sigaction sa;
 
-  printf("[DEBUG] Setting up signal handlers in PID %d\n", getpid());
+  log_info("Setting up signal handlers PID=%d",
+         getpid());
 
   // Setup SIGINT and SIGTERM for parent
 
@@ -92,7 +96,8 @@ void setup_signals(void) {
     perror("sigaction SIGINT");
     exit(EXIT_FAILURE);
   }
-  printf("[DEBUG] SIGINT handler installed in PID %d\n", getpid());
+  log_info("SIGINT handler installed PID=%d",
+         getpid());
 
   // Handle SIGTERM, same mask and flags, but different handler
   sa.sa_handler = handle_sigterm;
